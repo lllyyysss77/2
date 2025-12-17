@@ -352,16 +352,16 @@ export default function App() {
       
       <div className="w-full max-w-[640px] flex flex-col h-full relative shadow-2xl">
         
-        {/* Background Decor */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-50">
+        {/* fix: [无障碍优化] [2025-12-17] 添加装饰性背景的aria-hidden */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-50" aria-hidden="true">
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-200/40 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-3xl animate-[spin_20s_linear_infinite]" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-orange-200/40 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] blur-3xl animate-[spin_15s_linear_infinite_reverse]" />
         </div>
 
-        {/* Header */}
-        <header className="z-20 w-full flex justify-between items-center p-4 shrink-0 bg-transparent">
+        {/* fix: [无障碍优化] [2025-12-17] Header添加banner角色 */}
+        <header role="banner" className="z-20 w-full flex justify-between items-center p-4 shrink-0 bg-transparent">
           <div className="flex items-center gap-2 clay-card px-3 py-1.5 rounded-full bg-[var(--bg-color)]/80 backdrop-blur-sm">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[var(--primary-btn)] to-[#E55050] flex items-center justify-center shadow-inner text-white font-bold text-xs">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[var(--primary-btn)] to-[#E55050] flex items-center justify-center shadow-inner text-white font-bold text-xs" aria-hidden="true">
                   G
               </div>
               <h1 className="text-base font-bold font-[inherit] text-[var(--text-color)]">东里二丫</h1>
@@ -371,13 +371,14 @@ export default function App() {
               onClick={handleClearHistory}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--bg-color)]/50 backdrop-blur-sm hover:bg-black/5 text-[var(--text-color)] opacity-60 transition-colors"
               title="清空对话"
+              aria-label="清空对话历史"
           >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" aria-hidden="true" />
           </button>
         </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 flex flex-col items-center w-full z-10 overflow-hidden relative">
+        {/* fix: [无障碍优化] [2025-12-17] Main区域使用main角色 */}
+        <main className="flex-1 flex flex-col items-center w-full z-10 overflow-hidden relative" aria-label="对话区域">
           
           {/* Character View */}
           <div className="w-full shrink-0 flex justify-center pt-2 pb-6 z-20">
@@ -388,17 +389,19 @@ export default function App() {
              />
           </div>
 
-          {/* Chat List */}
+          {/* fix: [无障碍优化] [2025-12-17] 聊天列表区域添加log角色 */}
           <div className="w-full flex-1 relative overflow-hidden">
-             {/* Top Fade Mask */}
-             <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-[var(--bg-color)] to-transparent z-10 pointer-events-none" />
+             <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-[var(--bg-color)] to-transparent z-10 pointer-events-none" aria-hidden="true" />
 
              <div 
                 ref={scrollRef}
                 className="w-full h-full overflow-y-auto px-4 pb-32 pt-4 scrollbar-hide flex flex-col items-center gap-4"
+                role="log"
+                aria-live="polite"
+                aria-label="对话消息"
              >
                 {messages.length === 0 && (
-                    <div className="text-center text-[var(--text-color)] opacity-40 text-sm mt-4 select-none flex flex-col items-center gap-2 animate-slide-up">
+                    <div className="text-center text-[var(--text-color)] opacity-40 text-sm mt-4 select-none flex flex-col items-center gap-2 animate-slide-up" role="status">
                         <p>我是二丫，村里有啥新鲜事？</p>
                         <div className="flex items-center gap-2 text-xs opacity-70 mt-2 bg-white/30 px-3 py-1 rounded-full backdrop-blur-sm">
                             <span className="font-bold">按住我</span>
@@ -426,8 +429,8 @@ export default function App() {
                 ))}
 
                 {error && (
-                    <div className="clay-card bg-[var(--error-color)] border-l-4 border-[var(--error-border)] p-3 flex items-start gap-2 w-full animate-bounce-in mt-2">
-                        <AlertCircle className="w-5 h-5 text-[var(--error-border)] shrink-0" />
+                    <div className="clay-card bg-[var(--error-color)] border-l-4 border-[var(--error-border)] p-3 flex items-start gap-2 w-full animate-bounce-in mt-2" role="alert" aria-live="assertive">
+                        <AlertCircle className="w-5 h-5 text-[var(--error-border)] shrink-0" aria-hidden="true" />
                         <p className="text-xs opacity-80 text-[var(--text-color)]">{error}</p>
                     </div>
                 )}
@@ -435,18 +438,20 @@ export default function App() {
           </div>
         </main>
 
-        {/* Footer Interaction Zone */}
-        <footer className="absolute bottom-0 left-0 w-full z-30 p-0 flex flex-col items-center justify-end pointer-events-none">
+        {/* fix: [无障碍优化] [2025-12-17] Footer区域添加contentinfo角色 */}
+        <footer role="contentinfo" className="absolute bottom-0 left-0 w-full z-30 p-0 flex flex-col items-center justify-end pointer-events-none">
           
           {/* Action Hints (Dynamic based on drag) */}
-          <div className={`absolute bottom-32 w-full flex justify-center transition-all duration-300 pointer-events-none ${appState === AppState.RECORDING ? 'opacity-100' : 'opacity-0 translate-y-10'}`}>
+          <div className={`absolute bottom-32 w-full flex justify-center transition-all duration-300 pointer-events-none ${appState === AppState.RECORDING ? 'opacity-100' : 'opacity-0 translate-y-10'}`} aria-live="polite">
               
               {/* Cancel Hint (Left/Right) */}
               <div className={`absolute transition-all duration-300 flex items-center gap-2
                   ${isCanceling ? 'scale-110 opacity-100 text-gray-500' : 'scale-90 opacity-40 text-gray-400'}`}
                   style={{ transform: `translateX(${dragX * 0.5}px)` }}
+                  role="status"
+                  aria-label="向左或右滑动可取消录音"
               >
-                  <X className="w-6 h-6" />
+                  <X className="w-6 h-6" aria-hidden="true" />
                   <span className="text-sm font-bold">松手取消</span>
               </div>
 
@@ -454,8 +459,10 @@ export default function App() {
               {!isCanceling && (
                   <div className={`absolute -top-10 transition-all duration-300 flex flex-col items-center gap-1
                       ${isReadyToThrow ? 'scale-110 opacity-100 text-[var(--primary-btn)]' : 'scale-90 opacity-40 text-[var(--text-color)]'}`}
+                      role="status"
+                      aria-label="向上滑动可发送录音"
                   >
-                      <ChevronUp className="w-8 h-8 animate-bounce" />
+                      <ChevronUp className="w-8 h-8 animate-bounce" aria-hidden="true" />
                       <span className="text-sm font-bold tracking-widest">松手发送</span>
                   </div>
               )}
@@ -463,16 +470,17 @@ export default function App() {
 
           <div className="pointer-events-auto w-full h-32 relative flex justify-center items-center bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent">
             
-            {/* Settings Button */}
+            {/* fix: [无障碍优化] [2025-12-17] Settings按钮添加aria-label */}
             <button 
                 onClick={() => setIsSettingsOpen(true)}
                 className={`absolute left-6 bottom-8 clay-btn w-10 h-10 bg-[var(--bg-color)] text-[var(--text-color)] transition-all duration-300
                     ${appState === AppState.RECORDING ? 'opacity-0 scale-50' : 'opacity-100 scale-100'}`}
+                aria-label="打开设置面板"
             >
-                <Settings2 className="w-5 h-5 opacity-70" />
+                <Settings2 className="w-5 h-5 opacity-70" aria-hidden="true" />
             </button>
 
-            {/* THE ELASTIC BUTTON / BLOB */}
+            {/* fix: [无障碍优化] [2025-12-17] 主录音按钮添加完整aria标签 */}
             <button
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
@@ -490,17 +498,23 @@ export default function App() {
                     ${isLaunched ? 'animate-launch' : ''}
                     ${appState === AppState.PROCESSING ? 'opacity-50 cursor-wait' : ''}
                 `}
+                aria-label={
+                    appState === AppState.RECORDING ? '正在录音，向上滑动发送，向左右滑动取消' :
+                    appState === AppState.PROCESSING ? '正在处理' :
+                    appState === AppState.PLAYING ? '正在播放回复' :
+                    '按住并向上滑动开始录音'
+                }
+                aria-pressed={appState === AppState.RECORDING}
             >
                 {/* Internal Icon & Visuals */}
                 <div className="relative z-10 pointer-events-none transition-all duration-200">
                     {appState === AppState.RECORDING ? (
                         isReadyToThrow ? (
-                            <Send className="w-8 h-8 text-white rotate-[-45deg] animate-pulse" />
+                            <Send className="w-8 h-8 text-white rotate-[-45deg] animate-pulse" aria-hidden="true" />
                         ) : isCanceling ? (
-                            <X className="w-8 h-8 text-white" />
+                            <X className="w-8 h-8 text-white" aria-hidden="true" />
                         ) : (
-                           /* Visualizer Bars */
-                           <div className="flex gap-1 items-end h-6">
+                           <div className="flex gap-1 items-end h-6" aria-hidden="true">
                               {[1,2,3].map(i => (
                                   <div key={i} 
                                        className="w-1.5 bg-white/80 rounded-full transition-all duration-75" 
@@ -510,27 +524,27 @@ export default function App() {
                            </div>
                         )
                     ) : appState === AppState.PROCESSING ? (
-                        <Loader2 className="w-8 h-8 text-[var(--accent-color)] animate-spin" />
+                        <Loader2 className="w-8 h-8 text-[var(--accent-color)] animate-spin" aria-hidden="true" />
                     ) : (
-                        <Mic className={`w-8 h-8 ${appState === AppState.PLAYING ? 'text-[var(--success-color)]' : 'text-[var(--primary-btn)]'}`} />
+                        <Mic className={`w-8 h-8 ${appState === AppState.PLAYING ? 'text-[var(--success-color)]' : 'text-[var(--primary-btn)]'}`} aria-hidden="true" />
                     )}
                 </div>
 
                 {/* Ripple Ring on Press */}
                 {appState === AppState.RECORDING && !isLaunched && (
-                    <div className="absolute inset-0 border-4 border-white/30 rounded-full animate-ripple pointer-events-none" />
+                    <div className="absolute inset-0 border-4 border-white/30 rounded-full animate-ripple pointer-events-none" aria-hidden="true" />
                 )}
             </button>
 
             {/* Info Icon */}
             <div className={`absolute right-6 bottom-8 pointer-events-none opacity-50 hidden sm:block transition-opacity
-                 ${appState === AppState.RECORDING ? 'opacity-0' : 'opacity-50'}`}>
+                 ${appState === AppState.RECORDING ? 'opacity-0' : 'opacity-50'}`} aria-hidden="true">
                  <Info className="w-5 h-5 text-[var(--text-color)]" />
             </div>
 
           </div>
           
-          <div className="absolute bottom-2 text-[10px] text-[var(--text-color)] opacity-30 font-semibold select-none pb-2">
+          <div className="absolute bottom-2 text-[10px] text-[var(--text-color)] opacity-30 font-semibold select-none pb-2" role="contentinfo">
              数字小村官 - 二丫
           </div>
         </footer>

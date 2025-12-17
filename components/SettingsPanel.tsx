@@ -29,11 +29,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      {/* fix: [无障碍优化] [2025-12-17] Backdrop添加role和aria-label */}
       <div 
         className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto transition-opacity" 
         onClick={onClose}
+        role="button"
+        aria-label="关闭设置面板"
       />
 
       {/* Panel */}
@@ -42,16 +44,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
         {/* Header */}
         <div className="flex justify-between items-center p-6 pb-2 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-[var(--secondary-btn)] flex items-center justify-center text-[var(--text-color)] shadow-inner">
+            <div className="w-10 h-10 rounded-full bg-[var(--secondary-btn)] flex items-center justify-center text-[var(--text-color)] shadow-inner" aria-hidden="true">
                <Settings className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-[var(--text-color)]">设置面板</h2>
+            <h2 id="settings-title" className="text-xl font-bold text-[var(--text-color)]">设置面板</h2>
           </div>
           <button 
             onClick={onClose}
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/5 transition-colors text-[var(--accent-color)]"
+            aria-label="关闭设置面板"
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           </button>
         </div>
 
@@ -60,79 +63,90 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
           
           {/* API Keys */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
-              <Key className="w-4 h-4" /> GLM-4 API Key(s)
+            <label htmlFor="api-keys" className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
+              <Key className="w-4 h-4" aria-hidden="true" /> GLM-4 API Key(s)
             </label>
             <input 
+              id="api-keys"
               type="text"
               placeholder="默认使用内置Key，支持多Key用逗号分隔"
               className="clay-input font-mono text-sm"
               value={localSettings.apiKeys}
               onChange={(e) => handleChange('apiKeys', e.target.value)}
+              aria-describedby="api-keys-help"
             />
+            <p id="api-keys-help" className="sr-only">支持多个API密钥，用逗号分隔</p>
           </div>
 
-          {/* Avatar Settings */}
-          <div className="space-y-4 pt-2 border-t border-[var(--shadow-dark)]">
-             <h3 className="text-sm font-bold text-[var(--text-color)] opacity-90">数字人形象设置</h3>
+          {/* fix: [无障碍优化] [2025-12-17] Avatar设置区域添加fieldset */}
+          <fieldset className="space-y-4 pt-2 border-t border-[var(--shadow-dark)]">
+             <legend className="text-sm font-bold text-[var(--text-color)] opacity-90">数字人形象设置</legend>
              
              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-xs font-bold opacity-70 text-[var(--text-color)]">
-                  <ImageIcon className="w-3 h-3" /> 静态封面 (Image URL)
+                <label htmlFor="avatar-image" className="flex items-center gap-2 text-xs font-bold opacity-70 text-[var(--text-color)]">
+                  <ImageIcon className="w-3 h-3" aria-hidden="true" /> 静态封面 (Image URL)
                 </label>
                 <input 
+                  id="avatar-image"
                   type="text"
                   placeholder="https://..."
                   className="clay-input text-xs"
                   value={localSettings.avatarImageUrl}
                   onChange={(e) => handleChange('avatarImageUrl', e.target.value)}
+                  aria-label="数字人静态封面图片地址"
                 />
              </div>
 
              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-xs font-bold opacity-70 text-[var(--text-color)]">
-                  <Video className="w-3 h-3" /> 说话视频 (Video URL)
+                <label htmlFor="avatar-video" className="flex items-center gap-2 text-xs font-bold opacity-70 text-[var(--text-color)]">
+                  <Video className="w-3 h-3" aria-hidden="true" /> 说话视频 (Video URL)
                 </label>
                 <input 
+                  id="avatar-video"
                   type="text"
                   placeholder="https://...mp4 (留空则只显示图片)"
                   className="clay-input text-xs"
                   value={localSettings.avatarVideoUrl}
                   onChange={(e) => handleChange('avatarVideoUrl', e.target.value)}
+                  aria-label="数字人说话视频地址"
                 />
              </div>
-          </div>
+          </fieldset>
 
           {/* System Prompt */}
           <div className="space-y-2 pt-2 border-t border-[var(--shadow-dark)]">
-            <label className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
-              <User className="w-4 h-4" /> 角色设定
+            <label htmlFor="system-prompt" className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
+              <User className="w-4 h-4" aria-hidden="true" /> 角色设定
             </label>
             <textarea 
+              id="system-prompt"
               className="clay-input min-h-[100px] text-sm leading-relaxed"
               value={localSettings.systemPrompt}
               onChange={(e) => handleChange('systemPrompt', e.target.value)}
+              aria-label="系统角色设定提示词"
             />
           </div>
 
           {/* Knowledge Base */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
-              <Book className="w-4 h-4" /> 知识库
+            <label htmlFor="knowledge-base" className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
+              <Book className="w-4 h-4" aria-hidden="true" /> 知识库
             </label>
             <textarea 
+              id="knowledge-base"
               className="clay-input min-h-[100px] text-sm leading-relaxed"
               value={localSettings.knowledgeBase}
               onChange={(e) => handleChange('knowledgeBase', e.target.value)}
+              aria-label="知识库内容"
             />
           </div>
 
-          {/* Theme Selector */}
-          <div className="space-y-2 pt-2 border-t border-[var(--shadow-dark)]">
-            <label className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
-              <Palette className="w-4 h-4" /> 皮肤风格
-            </label>
-            <div className="flex gap-2 flex-wrap">
+          {/* fix: [无障碍优化] [2025-12-17] Theme选择器添加fieldset和role */}
+          <fieldset className="space-y-2 pt-2 border-t border-[var(--shadow-dark)]">
+            <legend className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
+              <Palette className="w-4 h-4" aria-hidden="true" /> 皮肤风格
+            </legend>
+            <div className="flex gap-2 flex-wrap" role="group" aria-label="主题选择">
               {[
                 { id: Theme.CLAY_LIGHT, name: '陶土白', color: '#FFF5D9' },
                 { id: Theme.CLAY_DARK, name: '深邃夜', color: '#1e293b' },
@@ -144,24 +158,28 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
                   onClick={() => handleChange('theme', t.id)}
                   className={`clay-btn rect px-4 py-2 text-sm font-bold transition-transform relative overflow-hidden ${localSettings.theme === t.id ? 'ring-2 ring-[var(--primary-btn)] scale-105' : 'opacity-70'}`}
                   style={{ background: t.color, color: t.id === Theme.CLAY_DARK ? 'white' : '#5D4037' }}
+                  aria-pressed={localSettings.theme === t.id}
+                  aria-label={`选择${t.name}主题`}
                 >
                   {t.name}
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Custom CSS */}
           <div className={`space-y-2 transition-all duration-300 ${localSettings.theme === Theme.CUSTOM ? 'opacity-100 max-h-[500px]' : 'opacity-50 max-h-12 overflow-hidden'}`}>
-             <label className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
-               <Code className="w-4 h-4" /> 自定义 CSS
+             <label htmlFor="custom-css" className="flex items-center gap-2 text-sm font-bold opacity-80 text-[var(--text-color)]">
+               <Code className="w-4 h-4" aria-hidden="true" /> 自定义 CSS
              </label>
              <textarea 
+               id="custom-css"
                className="clay-input font-mono text-xs min-h-[100px]"
                placeholder=":root { --bg-color: #ff0000; }"
                value={localSettings.customCss}
                onChange={(e) => handleChange('customCss', e.target.value)}
                disabled={localSettings.theme !== Theme.CUSTOM}
+               aria-label="自定义CSS样式代码"
              />
           </div>
 
@@ -172,8 +190,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
             <button 
               onClick={handleSave}
               className="clay-btn-primary w-full py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+              aria-label="保存所有设置"
             >
-              <Save className="w-5 h-5" />
+              <Save className="w-5 h-5" aria-hidden="true" />
               保存设置
             </button>
         </div>
