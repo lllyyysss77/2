@@ -88,7 +88,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
                 </label>
                 <input 
                   id="avatar-image"
-                  type="url"
+                  type="text"
                   placeholder="https://..."
                   className="clay-input text-xs"
                   value={localSettings.avatarImageUrl}
@@ -103,7 +103,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, s
                 </label>
                 <input 
                   id="avatar-video"
-                  type="url"
+                  type="text"
                   placeholder="https://...mp4 (留空则只显示图片)"
                   className="clay-input text-xs"
                   value={localSettings.avatarVideoUrl}

@@ -377,8 +377,8 @@ export default function App() {
           </button>
         </header>
 
-        {/* fix: [无障碍优化] [2025-12-17] Main区域添加main角色和region */}
-        <main role="region" aria-label="对话区域" className="flex-1 flex flex-col items-center w-full z-10 overflow-hidden relative">
+        {/* fix: [无障碍优化] [2025-12-17] Main区域使用main角色 */}
+        <main className="flex-1 flex flex-col items-center w-full z-10 overflow-hidden relative" aria-label="对话区域">
           
           {/* Character View */}
           <div className="w-full shrink-0 flex justify-center pt-2 pb-6 z-20">
