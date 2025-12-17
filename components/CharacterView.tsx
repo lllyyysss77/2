@@ -66,22 +66,21 @@ export const CharacterView: React.FC<CharacterViewProps> = ({ state, avatarImage
   }
 
   return (
-    <div className="relative flex flex-col items-center group">
+    <div className="relative flex flex-col items-center group" role="img" aria-label={`数字人形象 - ${statusText}`}>
       {/* Container with Mask for blurred edges */}
       <div 
         className="relative w-48 h-64 sm:w-56 sm:h-72 transition-all duration-500"
         style={{
-          // Use CSS Mask to create the "fade out edges" effect
           maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)',
           WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)'
         }}
       >
-        {/* Background/Base */}
-        <div className="absolute inset-0 bg-[var(--shadow-dark)] opacity-10 rounded-full blur-xl transform scale-90 translate-y-4" />
+        {/* fix: [无障碍优化] [2025-12-17] 装饰性背景添加aria-hidden */}
+        <div className="absolute inset-0 bg-[var(--shadow-dark)] opacity-10 rounded-full blur-xl transform scale-90 translate-y-4" aria-hidden="true" />
 
         {/* Audio Waveform Animation (Subtle Overlay) */}
         {isTalking && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none" aria-hidden="true">
              {[...Array(3)].map((_, i) => (
                <div 
                  key={i} 
@@ -119,11 +118,12 @@ export const CharacterView: React.FC<CharacterViewProps> = ({ state, avatarImage
             muted
             playsInline
             className={`absolute inset-0 w-full h-full object-cover rounded-[3rem] transition-opacity duration-700 ease-in-out ${isPlaying ? 'opacity-100' : 'opacity-0'} z-20`}
+            aria-hidden="true"
           />
         )}
       </div>
 
-      {/* Floating Status Bubble - Positioned overlapping the bottom */}
+      {/* fix: [无障碍优化] [2025-12-17] 状态气泡添加role status */}
       <div className={`
         absolute -bottom-3 z-40
         flex items-center gap-1.5 px-4 py-1.5 
@@ -131,8 +131,8 @@ export const CharacterView: React.FC<CharacterViewProps> = ({ state, avatarImage
         transition-all duration-300 transform
         ${statusColor}
         ${state === AppState.PROCESSING ? 'scale-105' : 'scale-100'}
-      `}>
-        <StatusIcon className={`w-3.5 h-3.5 ${state === AppState.PROCESSING ? 'animate-spin' : ''}`} />
+      `} role="status" aria-live="polite">
+        <StatusIcon className={`w-3.5 h-3.5 ${state === AppState.PROCESSING ? 'animate-spin' : ''}`} aria-hidden="true" />
         <span className="text-xs font-bold tracking-wide">{statusText}</span>
       </div>
     </div>
