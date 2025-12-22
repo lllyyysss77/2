@@ -1,5 +1,5 @@
 {
-  "name": "Copy of GLM-4-Voice Chat",
+  "name": "Copy of GLM-4-Voice Chat智谱",
   "description": "Real-time voice interaction using ZhipuAI GLM-4-Voice model with audio visualization.",
   "requestFramePermissions": [
     "microphone"
