@@ -1,53 +1,59 @@
+
 import { blobToBase64 } from './audio';
 import { Message } from '../types';
 
-// Default key for fallback
+// 默认使用的 Key (仅作兜底，建议用户在设置中输入自己的)
 export const DEFAULT_KEY = "966cec8673c747d9af68fd11ae5226f9.DufxR7EdpFZQmihL";
 
 /**
- * Generates a JWT token for ZhipuAI authentication.
+ * 生成智谱 AI 鉴权 Token (JWT 模拟)
  */
 export const generateToken = async (apiKey: string): Promise<string> => {
-  const [id, secret] = apiKey.split('.');
-  if (!id || !secret) throw new Error('Invalid API Key format');
+  try {
+    const [id, secret] = apiKey.split('.');
+    if (!id || !secret) throw new Error('API Key 格式错误，应为 "id.secret"');
 
-  const now = Date.now();
-  const header = { alg: 'HS256', sign_type: 'SIGN' };
-  const payload = {
-    api_key: id,
-    exp: now + 3600 * 1000, 
-    timestamp: now,
-  };
+    const now = Date.now();
+    const header = { alg: 'HS256', sign_type: 'SIGN' };
+    const payload = {
+      api_key: id,
+      exp: now + 3600 * 1000, 
+      timestamp: now,
+    };
 
-  const encode = (obj: any) => btoa(JSON.stringify(obj)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  
-  const encodedHeader = encode(header);
-  const encodedPayload = encode(payload);
-  const data = `${encodedHeader}.${encodedPayload}`;
+    const encode = (obj: any) => btoa(JSON.stringify(obj)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    
+    const encodedHeader = encode(header);
+    const encodedPayload = encode(payload);
+    const data = `${encodedHeader}.${encodedPayload}`;
 
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
-  const msgData = encoder.encode(data);
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const msgData = encoder.encode(data);
 
-  const key = await crypto.subtle.importKey(
-    'raw',
-    keyData,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
 
-  const signature = await crypto.subtle.sign('HMAC', key, msgData);
-  const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+    const signature = await crypto.subtle.sign('HMAC', key, msgData);
+    const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
 
-  return `${data}.${encodedSignature}`;
+    return `${data}.${encodedSignature}`;
+  } catch (e) {
+    console.error("Token 生成失败:", e);
+    throw new Error("鉴权 Token 生成失败，请检查 API Key 格式");
+  }
 };
 
 /**
- * Sends audio to GLM-4-Voice.
+ * 发送语音消息到 GLM-4-Voice
  */
 export const sendVoiceMessage = async (
   apiKey: string,
@@ -56,50 +62,40 @@ export const sendVoiceMessage = async (
   systemPrompt: string | undefined,
   onChunk: (text: string, audio?: string, audioId?: string) => void
 ) => {
-  // Use provided key or fallback
-  const token = await generateToken(apiKey || DEFAULT_KEY);
+  const currentKey = apiKey || DEFAULT_KEY;
+  const token = await generateToken(currentKey);
   const base64Audio = await blobToBase64(audioBlob);
 
-  const messages = [];
+  // 构建消息体
+  const messages: any[] = [];
 
-  // 1. Add System Prompt if exists
+  // 1. 系统提示词 (GLM-4-Voice 建议放在第一条)
   if (systemPrompt) {
-      messages.push({
-          role: "system",
-          content: systemPrompt
-      });
+    messages.push({ role: "system", content: systemPrompt });
   }
 
-  // 2. Add history
-  // CRITICAL FIX: Zhipu GLM-4-Voice requires 'assistant' messages in history to have an 'audio.id' 
-  // if they were part of a voice session. Text-only assistant messages can cause 1214 error in some contexts.
-  // We only include assistant messages if we have the ID to be safe, or if it's purely text (though we avoid risking it).
-  for (const msg of history) {
+  // 2. 历史记录处理
+  history.forEach((msg) => {
     if (msg.role === 'user') {
-      if (msg.content && msg.content !== "..." && msg.content !== "语音消息") {
-         messages.push({
-           role: 'user',
-           content: msg.content
-         });
+      // 避免发送空文本历史
+      const cleanContent = msg.content?.trim();
+      if (cleanContent && cleanContent !== "..." && cleanContent !== "语音消息") {
+        messages.push({ role: 'user', content: cleanContent });
       }
     } else if (msg.role === 'assistant') {
+      // 智谱语音模型要求历史中的回复必须包含 audio.id 以维持声学上下文
       if (msg.audioId) {
         messages.push({
           role: 'assistant',
-          audio: {
-            id: msg.audioId
-          }
+          audio: { id: msg.audioId }
         });
-      } else {
-        // If we don't have an audio ID for the assistant, skipping it is safer than sending text
-        // which might trigger "audio.id cannot be empty" if the model expects voice context.
-        // However, if we have explicit text content and want to risk it, we could. 
-        // For stability: SKIP.
+      } else if (msg.content) {
+        messages.push({ role: 'assistant', content: msg.content });
       }
     }
-  }
+  });
 
-  // 3. Add current audio input
+  // 3. 当前语音输入 (必须是最后一项且为 user role)
   messages.push({
     role: 'user',
     content: [
@@ -112,6 +108,8 @@ export const sendVoiceMessage = async (
       }
     ]
   });
+
+  console.debug("发送到智谱的 Payload:", JSON.stringify({ model: 'glm-4-voice', messages }));
 
   try {
     const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
@@ -128,25 +126,28 @@ export const sendVoiceMessage = async (
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`ZhipuAI API Error (${response.status}): ${errText}`);
+      const errData = await response.json().catch(() => ({}));
+      const errMsg = errData.error?.message || response.statusText;
+      console.error("智谱 API 报错详情:", errData);
+      throw new Error(`API 错误 (${response.status}): ${errMsg}`);
     }
 
     const data = await response.json();
-    const choice = data.choices?.[0];
+    console.debug("智谱 API 返回数据:", data);
 
+    const choice = data.choices?.[0];
     if (choice) {
       const text = choice.message?.content || "";
-      // The API returns audio data in message.audio.data
       const audioData = choice.message?.audio?.data;
-      // Capture the ID for future context
       const audioId = choice.message?.audio?.id || choice.id; 
 
       onChunk(text, audioData, audioId);
+    } else {
+      throw new Error("服务器返回数据格式异常 (No choices)");
     }
 
-  } catch (error) {
-    console.error("ZhipuAI Request Failed:", error);
+  } catch (error: any) {
+    console.error("请求失败:", error);
     throw error;
   }
 };
